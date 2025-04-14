@@ -56,5 +56,6 @@ void setup()
         // No space available, display a message or take appropriate action
     }
 }
-// Code language: Arduino (arduino)
-// 16×2 Lcd Interfac
+
+Code language: Arduino (arduino)
+16×2 Lcd Interfac
