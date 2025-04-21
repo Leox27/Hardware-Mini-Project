@@ -1,0 +1,217 @@
+// This is my Hardware Mini Project.
+// The project is Car Parking by Ultrasonic Sensor with Safety Using Arduino UNO.
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// LCD setup
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Slot-1
+const int trig1 = 2;
+const int echo1 = 3;
+const int buzzer1 = 4;
+const int redLED1 = 8;
+const int greenLED1 = 9;
+
+// Slot-2
+const int trig2 = 5;
+const int echo2 = 6;
+const int buzzer2 = 7;
+const int redLED2 = 10;
+const int greenLED2 = 11;
+
+// Constants for conditions
+const int parkThreshold = 6;
+const int warnDistance = 1;
+const int fullyParkedLimit = 5;
+const int spacingLimit = 20;
+const int parkingIn = 13;
+
+bool slot1Occupied = false;
+bool slot2Occupied = false;
+
+void setup() 
+{
+  lcd.init();
+  lcd.backlight();
+
+  pinMode(trig1, OUTPUT);  pinMode(echo1, INPUT);
+  pinMode(buzzer1, OUTPUT); pinMode(redLED1, OUTPUT); pinMode(greenLED1, OUTPUT);
+
+  pinMode(trig2, OUTPUT);  pinMode(echo2, INPUT);
+  pinMode(buzzer2, OUTPUT); pinMode(redLED2, OUTPUT); pinMode(greenLED2, OUTPUT);
+
+  lcd.setCursor(0, 0);
+  lcd.print("Initializing...");
+  delay(2000);
+
+  lcd.setCursor(0, 0);
+  lcd.print("Welcome To ");
+  delay(1500);
+
+  lcd.setCursor(0, 0);
+  lcd.print("Car Parking Sys");
+  delay(2000);
+
+  lcd.clear();
+}
+
+void loop() 
+{
+  int dist1 = getDistance(trig1, echo1);
+  int dist2 = getDistance(trig2, echo2);
+
+  String status1 = "";
+  String status2 = "";
+
+  // Slot-1 Logic while parking car
+  if (dist1 >= warnDistance && dist1 <= fullyParkedLimit) 
+  {
+    digitalWrite(buzzer1, HIGH);
+    delay(500);
+
+    digitalWrite(buzzer1, LOW);
+    digitalWrite(redLED1, HIGH);
+    digitalWrite(greenLED1, LOW);
+
+    status1 = "S1: Approaching";
+
+    slot1Occupied = false;
+  } else if (dist1 >= parkThreshold && dist1 <= parkingIn) 
+  {
+    digitalWrite(buzzer1, LOW);
+    digitalWrite(redLED1, HIGH);
+    digitalWrite(greenLED1, LOW);
+
+    if (!slot1Occupied) beep(buzzer1);
+
+    slot1Occupied = true;
+
+    status1 = "S1: Parked";
+  } else if (dist1 >= parkingIn && dist1 <= spacingLimit) 
+  {
+    digitalWrite(buzzer1, LOW);
+    digitalWrite(redLED1, LOW);
+    digitalWrite(greenLED1, HIGH);
+
+    status1 = "S1: Parking";
+
+    slot1Occupied = false;
+  } else {
+    digitalWrite(buzzer1, LOW);
+    digitalWrite(redLED1, LOW);
+    digitalWrite(greenLED1, HIGH);
+
+    slot1Occupied = false;
+
+    status1 = "S1: Empty";
+  }
+
+  // Slot-2 Logic while parking car
+  if (dist2 >= warnDistance && dist2 <= fullyParkedLimit) 
+  {
+    digitalWrite(buzzer2, HIGH);
+    delay(500);
+
+    digitalWrite(buzzer2, LOW);
+    digitalWrite(redLED2, HIGH);
+    digitalWrite(greenLED2, LOW);
+
+    slot2Occupied = false;
+
+    status2 = "S2: Approaching";
+    } else if (dist2 >= parkThreshold && dist2 <= parkingIn) 
+    {
+    digitalWrite(buzzer2, LOW);
+    digitalWrite(redLED2, HIGH);
+    digitalWrite(greenLED2, LOW);
+
+    if (!slot2Occupied) beep(buzzer2);
+
+    slot2Occupied = true;
+
+    status2 = "S2: Parked";
+  } else if (dist2 >= parkingIn && dist2 <= spacingLimit) 
+  {
+    digitalWrite(buzzer2, LOW);
+    digitalWrite(redLED2, LOW);
+    digitalWrite(greenLED2, HIGH);
+
+    status2 = "S2: Parking";
+
+    slot2Occupied = false;
+  } else 
+  {
+    digitalWrite(buzzer2, LOW);
+    digitalWrite(redLED2, LOW);
+    digitalWrite(greenLED2, HIGH);
+
+    slot2Occupied = false;
+
+    status2 = "S2: Empty";
+  }
+
+  // Spacing warning for car to not hit the parking slot
+  bool tooClose = false;
+  if (slot1Occupied && slot2Occupied) 
+  {
+    int spacing = abs(dist1 - dist2);
+
+    if (spacing < spacingLimit) 
+    {
+      tooClose = true;
+      digitalWrite(buzzer1, HIGH);
+      digitalWrite(buzzer2, HIGH);
+    }
+  } else 
+  {
+    digitalWrite(buzzer1, LOW);
+    digitalWrite(buzzer2, LOW);
+  }
+
+  // LCD Display (The "tooclose" may be it will not be displayed because of small LCD Display)
+  lcd.clear();
+  if (tooClose) 
+  {
+    lcd.setCursor(0, 0);
+    lcd.print("CARS TOO CLOSE!");
+
+    lcd.setCursor(0, 1);
+    lcd.print("Move & Repark!");
+  } else 
+  {
+    lcd.setCursor(0, 0);
+    lcd.print(status1);
+
+    lcd.setCursor(0, 1);
+    lcd.print(status2);
+  }
+
+  delay(500);
+}
+
+// Distance function for converting the unit in cm
+int getDistance(int trigPin, int echoPin) 
+{
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+
+  int distance = duration * 0.034 / 2;
+
+  if (distance == 0 || distance > 400) return 400;
+  return distance;
+}
+
+// Short beep - when car parked well
+void beep(int pin) 
+{
+  digitalWrite(pin, HIGH);
+  delay(150);
+  digitalWrite(pin, LOW);
+}
