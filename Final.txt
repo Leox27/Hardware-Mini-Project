@@ -110,7 +110,7 @@ void loop()
     } else 
     {
       unsigned long elapsed1 = (currentTime - slot1StartTime) / 10000;
-      charge1 = 5 * pow(2, elapsed1);
+      charge1 = 5 * (2, elapsed1);
     }
     slot1Occupied = true;
     status1 = "S1: Parked";
@@ -165,7 +165,7 @@ void loop()
     } else 
     {
       unsigned long elapsed2 = (currentTime - slot2StartTime) / 10000;
-      charge2 = 5 * pow(2, elapsed2);
+      charge2 = 5 * (2, elapsed2);
     }
     slot2Occupied = true;
     status2 = "S2: Parked";
