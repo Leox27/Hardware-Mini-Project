@@ -1,4 +1,4 @@
-// This is my Hardware Mini Project...
+// This is my Mini Hardware Project...
 // The project is Car Parking by Ultrasonic Sensor with Safety Using Arduino UNO.
 
 #include <Wire.h>
@@ -23,11 +23,12 @@ const int buzzer2 = 7;
 const int redLED2 = 10;
 const int greenLED2 = 11;
 
-// IR Sensor and Servo Motor defining
-const int irSensor = 12;
+// IR Sensors and Servo Motor
+const int irEntrySensor = 12;     // Entry IR Sensor
+const int irExitSensor = A0;      // Exit IR Sensor
 Servo gateServo;
 
-// Constants for giving conditions
+// Constants
 const int parkThreshold = 3;
 const int warnDistance = 1;
 const int fullyParkedLimit = 2;
@@ -54,10 +55,11 @@ void setup()
   pinMode(trig2, OUTPUT); pinMode(echo2, INPUT);
   pinMode(buzzer2, OUTPUT); pinMode(redLED2, OUTPUT); pinMode(greenLED2, OUTPUT);
 
-  pinMode(irSensor, INPUT);
+  pinMode(irEntrySensor, INPUT);  // Entry IR
+  pinMode(irExitSensor, INPUT);   // Exit IR
 
   gateServo.attach(13);
-  gateServo.write(0); // Gate initially closed
+  gateServo.write(0); // It is neccessary to Gate initially closed
 
   lcd.setCursor(0, 0);
   lcd.print("Initializing...");
@@ -83,159 +85,164 @@ void loop()
 
   unsigned long currentTime = millis();
 
-  // SLOT-1 LOGIC
+  // SLOT-1 LOGIC Conditions---
+
   if (dist1 >= warnDistance && dist1 <= fullyParkedLimit) 
   {
     digitalWrite(buzzer1, HIGH);
     digitalWrite(redLED1, HIGH); 
     digitalWrite(greenLED1, LOW);
-
     status1 = "S1: Approaching";
     slot1Occupied = false;
-
     slot1StartTime = 0;
     charge1 = 0;
-  } else if (dist1 >= parkThreshold && dist1 <= parkingIn) 
+  } 
+  else if (dist1 >= parkThreshold && dist1 <= parkingIn) 
   {
     digitalWrite(buzzer1, LOW);
     digitalWrite(redLED1, HIGH); 
     digitalWrite(greenLED1, LOW);
-
     if (!slot1Occupied) 
     {
       beep(buzzer1);
-
       slot1StartTime = currentTime;
       charge1 = 5;
-    } else 
+    } 
+    else 
     {
       unsigned long elapsed1 = (currentTime - slot1StartTime) / 10000;
-      charge1 = 5 * (2, elapsed1);
+      charge1 = 5 + (elapsed1 * 5);
     }
     slot1Occupied = true;
     status1 = "S1: Parked";
-  } else if (dist1 >= parkingIn && dist1 <= spacingLimit) 
+  } 
+  else if (dist1 >= parkingIn && dist1 <= spacingLimit) 
   {
     digitalWrite(buzzer1, LOW);
     digitalWrite(redLED1, LOW); 
     digitalWrite(greenLED1, HIGH);
-
     status1 = "S1: Parking";
     slot1Occupied = false;
-
     slot1StartTime = 0;
     charge1 = 0;
-  } else 
+  } 
+  else 
   {
     digitalWrite(buzzer1, LOW);
     digitalWrite(redLED1, LOW); 
     digitalWrite(greenLED1, HIGH);
-
     status1 = "S1: Empty";
     slot1Occupied = false;
-
     slot1StartTime = 0;
     charge1 = 0;
   }
 
-  // SLOT-2 LOGIC
+  // SLOT-2 LOGIC Conditions---
+
   if (dist2 >= warnDistance && dist2 <= fullyParkedLimit) 
   {
     digitalWrite(buzzer2, HIGH);
     digitalWrite(redLED2, HIGH); 
     digitalWrite(greenLED2, LOW);
-
     status2 = "S2: Approaching";
     slot2Occupied = false;
-
     slot2StartTime = 0;
     charge2 = 0;
-  } else if (dist2 >= parkThreshold && dist2 <= parkingIn) 
+  } 
+  else if (dist2 >= parkThreshold && dist2 <= parkingIn) 
   {
     digitalWrite(buzzer2, LOW);
     digitalWrite(redLED2, HIGH); 
     digitalWrite(greenLED2, LOW);
-
     if (!slot2Occupied) 
     {
       beep(buzzer2);
-
       slot2StartTime = currentTime;
       charge2 = 5;
-    } else 
+    } 
+    else 
     {
       unsigned long elapsed2 = (currentTime - slot2StartTime) / 10000;
-      charge2 = 5 * (2, elapsed2);
+      charge2 = 5 + (elapsed2 * 5);
     }
     slot2Occupied = true;
     status2 = "S2: Parked";
-  } else if (dist2 >= parkingIn && dist2 <= spacingLimit) 
+  } 
+  else if (dist2 >= parkingIn && dist2 <= spacingLimit) 
   {
     digitalWrite(buzzer2, LOW);
     digitalWrite(redLED2, LOW); 
     digitalWrite(greenLED2, HIGH);
-
     status2 = "S2: Parking";
     slot2Occupied = false;
-
     slot2StartTime = 0;
     charge2 = 0;
-  } else 
+  } 
+  else 
   {
     digitalWrite(buzzer2, LOW);
     digitalWrite(redLED2, LOW); 
     digitalWrite(greenLED2, HIGH);
-
     status2 = "S2: Empty";
     slot2Occupied = false;
-
     slot2StartTime = 0;
     charge2 = 0;
   }
 
-  // --- Advanced Gate Logic: Open on departure ---
-  static bool prevSlot1Occupied = false;
-  static bool prevSlot2Occupied = false;
-  static bool carExiting = false;
+  // GATE CONTROL LOGIC of "Servo Motor" ---
+int irEntryState = digitalRead(irEntrySensor);
+int irExitState = digitalRead(irExitSensor);
 
-  int irState = digitalRead(irSensor);
+// Entry Gate 
+if (irEntryState == LOW && !(slot1Occupied && slot2Occupied)) 
+{
+  gateServo.write(90);  // Open gate because it's 90 degree
 
-  bool slot1Leaving = prevSlot1Occupied && dist1 > spacingLimit;
-  bool slot2Leaving = prevSlot2Occupied && dist2 > spacingLimit;
-
-  if ((slot1Leaving || slot2Leaving) && !carExiting) 
+  // Keep the gate open as long as either the entry or exit the IR sensor detects a car...
+  while (digitalRead(irEntrySensor) == LOW || digitalRead(irExitSensor) == LOW) 
   {
-    carExiting = true;
-    gateServo.write(90); // Open gate
+    delay(5000); // Wait for the car to leave
   }
 
-  if (carExiting) 
-  {
-    if (irState == HIGH) 
-    {
-      delay(10000); // 10-second delay before closing
+  // When both sensors no longer detect the car, then close the gate
+  delay(1000);  
+  
+  // Too many delay for safety...
+  gateServo.write(90);
+  delay(1000);
+  gateServo.write(67);
+  delay(1000);
+  gateServo.write(45);
+  delay(1000);
+  gateServo.write(0); // Close gate 0 degree 
+}
 
-      gateServo.write(0);  // Close gate once car has left
-      carExiting = false;
-    }
-  } else if (irState == LOW && !(slot1Occupied && slot2Occupied)) 
+// Exit Gate
+else if (irExitState == LOW) 
+{
+  gateServo.write(90);
+
+  // Wait until the car leaves the IR sensor area
+  while (digitalRead(irExitSensor) == LOW) 
   {
-    gateServo.write(90); // Open for entry if space
-  } else 
-  {
-    gateServo.write(0); // Default closed
+    delay(100);
   }
 
-  prevSlot1Occupied = slot1Occupied;
-  prevSlot2Occupied = slot2Occupied;
+  // Keep gate open as long as the exit or entry sensor detects the car
+  delay(4000);  // After car passed wait 4 seconds
+  gateServo.write(0);   
+}
 
-  // LCD Update
+  // LCD DISPLAY Print ---
   lcd.clear();
+
   if (slot1Occupied) 
   {
     lcd.setCursor(0, 0);
     lcd.print(status1 + " C1:" + String(charge1));
-  } else 
+    delay(5000);
+  } 
+  else 
   {
     lcd.setCursor(0, 0);
     lcd.print(status1);
@@ -245,7 +252,9 @@ void loop()
   {
     lcd.setCursor(0, 1);
     lcd.print(status2 + " C2:" + String(charge2));
-  } else 
+    delay(5000);
+  } 
+  else 
   {
     lcd.setCursor(0, 1);
     lcd.print(status2);
@@ -254,23 +263,24 @@ void loop()
   delay(500);
 }
 
-// Distance Calculation Function
+// Distance Calculation to convert it in "cm"...
 int getDistance(int trigPin, int echoPin) 
 {
   digitalWrite(trigPin, LOW); 
   delayMicroseconds(2);
-
   digitalWrite(trigPin, HIGH); 
   delayMicroseconds(10);
-
   digitalWrite(trigPin, LOW);
 
   long duration = pulseIn(echoPin, HIGH, 30000);
-  int distance = duration * 0.034 / 2;
+
+  int distance = duration * 0.034 / 2; // convert to "cm" Formula
+
   return (distance == 0 || distance > 400) ? 400 : distance;
 }
 
-// Beep Function
+// Single time Beep Function for "Parked" purpose....
+
 void beep(int pin) 
 {
   digitalWrite(pin, HIGH);
