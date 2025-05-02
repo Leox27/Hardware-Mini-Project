@@ -26,9 +26,10 @@ const int greenLED2 = 11;
 // IR Sensors and Servo Motor
 const int irEntrySensor = 12;     // Entry IR Sensor
 const int irExitSensor = A0;      // Exit IR Sensor
+
 Servo gateServo;
 
-// Constants
+// Constants For giving conditions while parking
 const int parkThreshold = 3;
 const int warnDistance = 1;
 const int fullyParkedLimit = 2;
@@ -289,3 +290,4 @@ void beep(int pin)
 }
 
 // This is our final code of car parking system
+// Note this code run in only Arduino IDE Software...
