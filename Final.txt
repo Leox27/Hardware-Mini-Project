@@ -279,7 +279,7 @@ int getDistance(int trigPin, int echoPin)
   return (distance == 0 || distance > 400) ? 400 : distance;
 }
 
-// Single time Beep Function for "Parked" purpose....
+// Single time Beep Function for "Parked" purpose...
 
 void beep(int pin) 
 {
@@ -287,3 +287,5 @@ void beep(int pin)
   delay(150);
   digitalWrite(pin, LOW);
 }
+
+// This is our final code of car parking system
