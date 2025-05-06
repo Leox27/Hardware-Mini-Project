@@ -1,7 +1,7 @@
 Smart Car Parking System – Project Summary
 
 Project Title:
-Car Parking by Ultrasonic Sensor with Safety Using Arduino UNO
+Car Parking Syatem Using Arduino UNO
 
 Overview:
 This hardware mini project presents a smart car parking system using Arduino UNO, ultrasonic sensors, IR sensors, a servo motor, LEDs, a buzzer, and an LCD display. It intelligently manages two parking slots, detects vehicle presence, controls gate access, calculates dynamic parking charges, and ensures safety through real-time feedback.
