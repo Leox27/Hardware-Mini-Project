@@ -13,9 +13,20 @@ This is a **smart car parking system** developed using Arduino UNO that manages 
 
 ## 👨‍💻 Team Members
 
-1. **Mayur Jadhav**  
-2. **Rushikesh Kale**  
-3. **Sachin Chavan**  
+1. **Mayur Jadhav**
+   - 📧 Email: mayurx27@gmail.com  
+   - 💼 LinkedIn: [Mayur Jadhav](https://linkedin.com/in/mayur-j-9ab192363)  
+   - 🐙 GitHub: [Leox27](https://github.com/Leox27)
+     
+3. **Rushikesh Kale**
+   - 📧 Email: rushikale8126@gmail.com  
+   - 💼 LinkedIn: [Rushikesh Kale](https://www.linkedin.com/in/rushikesh-kale-807a34321/)
+   - 🐙 GitHub: [mr-rushi1002](https://github.com/mr-rushi1002)
+     
+5. **Sachin Chavan**
+   - 📧 Email: sc7339371@gmail.com  
+   - 💼 LinkedIn: [Sachin Chavan](https://www.linkedin.com/in/sachin-chavan-200771350/)
+   - 🐙 GitHub: [](https://github.com/)
 
 **Guide**: Prof. V. V. Gurav Sir  
 **Institute**: Brahmdevdada Mane Institute of Technology (BMIT), Solapur  
