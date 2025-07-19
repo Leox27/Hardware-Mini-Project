@@ -26,7 +26,7 @@ This is a **smart car parking system** developed using Arduino UNO that manages 
 5. **Sachin Chavan**
    - 📧 Email: sc7339371@gmail.com  
    - 💼 LinkedIn: [Sachin Chavan](https://www.linkedin.com/in/sachin-chavan-200771350/)
-   - 🐙 GitHub: [](https://github.com/)
+   - 🐙 GitHub: [Sachin Chavan](https://github.com/SachinChavan24)
 
 **Guide**: Prof. V. V. Gurav Sir  
 **Institute**: Brahmdevdada Mane Institute of Technology (BMIT), Solapur  
